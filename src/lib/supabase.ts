@@ -1,13 +1,35 @@
 import { createClient } from '@supabase/supabase-js'
+import { mockAuth, mockDb, mockSubscribe, addSampleData } from './mock-supabase'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+// Check if we're using the demo/development configuration
+const isDevelopment = supabaseUrl?.includes('ayursutra-demo') || supabaseUrl?.includes('your-project') || supabaseUrl?.includes('localhost')
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+let supabase: any
+
+if (isDevelopment) {
+  // Use mock service for development
+  console.log('🔧 Using development mock service')
+  addSampleData()
+  
+  supabase = {
+    auth: mockAuth,
+    from: () => ({
+      select: () => ({ data: [], error: null }),
+      insert: () => ({ data: [], error: null }),
+      update: () => ({ data: [], error: null }),
+      delete: () => ({ error: null })
+    })
+  }
+} else {
+  // Use real Supabase for production
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+  supabase = createClient(supabaseUrl, supabaseAnonKey)
+}
 
 // Database Types
 export type Patient = {
@@ -83,6 +105,10 @@ export const db = {
   // Patient operations
   patients: {
     async getAll(practitionerId: string) {
+      if (isDevelopment) {
+        return await mockDb.patients.getAll(practitionerId)
+      }
+      
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -94,6 +120,10 @@ export const db = {
     },
 
     async getById(id: string) {
+      if (isDevelopment) {
+        return await mockDb.patients.getById(id)
+      }
+      
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -105,6 +135,10 @@ export const db = {
     },
 
     async create(patient: Omit<Patient, 'id' | 'created_at' | 'updated_at'>) {
+      if (isDevelopment) {
+        return await mockDb.patients.create(patient)
+      }
+      
       const { data, error } = await supabase
         .from('patients')
         .insert([patient])
@@ -116,6 +150,10 @@ export const db = {
     },
 
     async update(id: string, updates: Partial<Patient>) {
+      if (isDevelopment) {
+        return await mockDb.patients.update(id, updates)
+      }
+      
       const { data, error } = await supabase
         .from('patients')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -128,6 +166,10 @@ export const db = {
     },
 
     async delete(id: string) {
+      if (isDevelopment) {
+        return await mockDb.patients.delete(id)
+      }
+      
       const { error } = await supabase
         .from('patients')
         .delete()
@@ -140,6 +182,10 @@ export const db = {
   // Therapy operations
   therapies: {
     async getAll(practitionerId: string) {
+      if (isDevelopment) {
+        return await mockDb.therapies.getAll(practitionerId)
+      }
+      
       const { data, error } = await supabase
         .from('therapies')
         .select(`
@@ -159,6 +205,10 @@ export const db = {
     },
 
     async getById(id: string) {
+      if (isDevelopment) {
+        return await mockDb.therapies.getById(id)
+      }
+      
       const { data, error } = await supabase
         .from('therapies')
         .select(`
@@ -178,6 +228,10 @@ export const db = {
     },
 
     async create(therapy: Omit<Therapy, 'id' | 'created_at' | 'updated_at'>) {
+      if (isDevelopment) {
+        return await mockDb.therapies.create(therapy)
+      }
+      
       const { data, error } = await supabase
         .from('therapies')
         .insert([therapy])
@@ -197,6 +251,10 @@ export const db = {
     },
 
     async update(id: string, updates: Partial<Therapy>) {
+      if (isDevelopment) {
+        return await mockDb.therapies.update(id, updates)
+      }
+      
       const { data, error } = await supabase
         .from('therapies')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -217,6 +275,10 @@ export const db = {
     },
 
     async delete(id: string) {
+      if (isDevelopment) {
+        return await mockDb.therapies.delete(id)
+      }
+      
       const { error } = await supabase
         .from('therapies')
         .delete()
@@ -226,6 +288,10 @@ export const db = {
     },
 
     async getByDate(date: string, practitionerId: string) {
+      if (isDevelopment) {
+        return await mockDb.therapies.getByDate(date, practitionerId)
+      }
+      
       const { data, error } = await supabase
         .from('therapies')
         .select(`
@@ -249,6 +315,10 @@ export const db = {
   // Feedback operations
   feedback: {
     async getAll(practitionerId: string) {
+      if (isDevelopment) {
+        return await mockDb.feedback.getAll(practitionerId)
+      }
+      
       const { data, error } = await supabase
         .from('feedback')
         .select(`
@@ -271,6 +341,10 @@ export const db = {
     },
 
     async create(feedback: Omit<Feedback, 'id' | 'created_at' | 'updated_at'>) {
+      if (isDevelopment) {
+        return await mockDb.feedback.create(feedback)
+      }
+      
       const { data, error } = await supabase
         .from('feedback')
         .insert([feedback])
@@ -282,6 +356,10 @@ export const db = {
     },
 
     async update(id: string, updates: Partial<Feedback>) {
+      if (isDevelopment) {
+        return await mockDb.feedback.update(id, updates)
+      }
+      
       const { data, error } = await supabase
         .from('feedback')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -297,6 +375,10 @@ export const db = {
   // Profile operations
   profiles: {
     async getByUserId(userId: string) {
+      if (isDevelopment) {
+        return await mockDb.profiles.getByUserId(userId)
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -308,6 +390,10 @@ export const db = {
     },
 
     async create(profile: Omit<Profile, 'id' | 'created_at' | 'updated_at'>) {
+      if (isDevelopment) {
+        return await mockDb.profiles.create(profile)
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .insert([profile])
@@ -319,6 +405,10 @@ export const db = {
     },
 
     async update(userId: string, updates: Partial<Profile>) {
+      if (isDevelopment) {
+        return await mockDb.profiles.update(userId, updates)
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -335,6 +425,10 @@ export const db = {
 // Authentication helpers
 export const auth = {
   async signUp(email: string, password: string, profileData: Partial<Profile>) {
+    if (isDevelopment) {
+      return await mockAuth.signUp(email, password, profileData)
+    }
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -357,6 +451,10 @@ export const auth = {
   },
 
   async signIn(email: string, password: string) {
+    if (isDevelopment) {
+      return await mockAuth.signIn(email, password)
+    }
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -367,17 +465,29 @@ export const auth = {
   },
 
   async signOut() {
+    if (isDevelopment) {
+      return await mockAuth.signOut()
+    }
+    
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   },
 
   async getCurrentUser() {
+    if (isDevelopment) {
+      return await mockAuth.getCurrentUser()
+    }
+    
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) throw error
     return user
   },
 
   async getCurrentProfile() {
+    if (isDevelopment) {
+      return await mockAuth.getCurrentProfile()
+    }
+    
     const user = await this.getCurrentUser()
     if (!user) return null
     
@@ -388,6 +498,10 @@ export const auth = {
 // Real-time subscriptions
 export const subscribe = {
   patients(practitionerId: string, callback: (payload: any) => void) {
+    if (isDevelopment) {
+      return mockSubscribe.patients(practitionerId, callback)
+    }
+    
     return supabase
       .channel('patients')
       .on('postgres_changes', 
@@ -403,6 +517,10 @@ export const subscribe = {
   },
 
   therapies(practitionerId: string, callback: (payload: any) => void) {
+    if (isDevelopment) {
+      return mockSubscribe.therapies(practitionerId, callback)
+    }
+    
     return supabase
       .channel('therapies')
       .on('postgres_changes', 
