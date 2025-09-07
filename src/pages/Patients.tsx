@@ -4,22 +4,48 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search, Phone, Mail, Filter, Users as UsersIcon, TrendingUp } from "lucide-react"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Plus, Search, Phone, Mail, Filter, Users as UsersIcon, TrendingUp, Edit, Trash2, Eye, Loader2 } from "lucide-react"
+import { usePatients } from "@/hooks/usePatients"
+import { PatientForm } from "@/components/PatientForm"
+import { Patient } from "@/lib/supabase"
+import { format } from "date-fns"
 
 export const Patients = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const { patients, isLoading, deletePatient, isDeleting } = usePatients()
 
-  const mockPatients = [
-    { id: "1", name: "Priya Sharma", email: "priya@email.com", phone: "+91 98765 43210", dosha: "Vata", lastVisit: "2024-01-15", status: "active" },
-    { id: "2", name: "Raj Patel", email: "raj@email.com", phone: "+91 98765 43211", dosha: "Pitta", lastVisit: "2024-01-10", status: "active" },
-    { id: "3", name: "Meera Singh", email: "meera@email.com", phone: "+91 98765 43212", dosha: "Kapha", lastVisit: "2024-01-08", status: "active" },
-    { id: "4", name: "Arjun Kumar", email: "arjun@email.com", phone: "+91 98765 43213", dosha: "Vata", lastVisit: "2024-01-05", status: "inactive" },
-  ]
-
-  const filteredPatients = mockPatients.filter(patient =>
+  const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.primary_dosha.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const handleEditPatient = (patient: Patient) => {
+    setSelectedPatient(patient)
+    setIsFormOpen(true)
+  }
+
+  const handleAddPatient = () => {
+    setSelectedPatient(null)
+    setIsFormOpen(true)
+  }
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false)
+    setSelectedPatient(null)
+  }
+
+  const handleDeletePatient = async (id: string) => {
+    try {
+      await deletePatient(id)
+    } catch (error) {
+      // Error is handled in the hook
+    }
+  }
 
   const getDoshaColor = (dosha: string) => {
     switch (dosha) {
@@ -38,6 +64,17 @@ export const Patients = () => {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gradient-subtle">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-ayur-green" />
+          <p className="text-muted-foreground">Loading patients...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex-1 space-y-8 p-8 bg-gradient-subtle animate-fade-in">
       <div className="max-w-7xl mx-auto">
@@ -47,10 +84,24 @@ export const Patients = () => {
             <h1 className="text-4xl font-display font-bold text-ayur-green mb-2">Patient Management</h1>
             <p className="text-lg text-muted-foreground">Comprehensive patient records and health tracking</p>
           </div>
-          <Button className="bg-gradient-ayur hover:shadow-ayur text-white font-semibold transition-all duration-300 hover:scale-105">
-            <Plus className="mr-2 h-5 w-5" />
-            Add New Patient
-          </Button>
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                className="bg-gradient-ayur hover:shadow-ayur text-white font-semibold transition-all duration-300 hover:scale-105"
+                onClick={handleAddPatient}
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Add New Patient
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <PatientForm 
+                patient={selectedPatient || undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setIsFormOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats Overview */}
@@ -60,7 +111,7 @@ export const Patients = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-muted-foreground">Total Patients</p>
-                  <p className="text-3xl font-display font-bold text-ayur-green">{mockPatients.length}</p>
+                  <p className="text-3xl font-display font-bold text-ayur-green">{patients.length}</p>
                 </div>
                 <UsersIcon className="h-8 w-8 text-ayur-green" />
               </div>
@@ -71,8 +122,10 @@ export const Patients = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground">Active This Month</p>
-                  <p className="text-3xl font-display font-bold text-ayur-green">{mockPatients.filter(p => p.status === 'active').length}</p>
+                  <p className="text-sm font-semibold text-muted-foreground">Active Patients</p>
+                  <p className="text-3xl font-display font-bold text-ayur-green">
+                    {patients.filter(p => p.status === 'active').length}
+                  </p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-ayur-green" />
               </div>
@@ -83,8 +136,15 @@ export const Patients = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground">Avg. Satisfaction</p>
-                  <p className="text-3xl font-display font-bold text-ayur-green">4.8</p>
+                  <p className="text-sm font-semibold text-muted-foreground">New This Month</p>
+                  <p className="text-3xl font-display font-bold text-ayur-green">
+                    {patients.filter(p => {
+                      const createdDate = new Date(p.created_at)
+                      const now = new Date()
+                      return createdDate.getMonth() === now.getMonth() && 
+                             createdDate.getFullYear() === now.getFullYear()
+                    }).length}
+                  </p>
                 </div>
                 <div className="h-8 w-8 bg-gradient-ayur rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">★</span>
@@ -131,7 +191,7 @@ export const Patients = () => {
                     <TableHead className="font-semibold text-ayur-green">Patient Information</TableHead>
                     <TableHead className="font-semibold text-ayur-green">Contact Details</TableHead>
                     <TableHead className="font-semibold text-ayur-green">Health Profile</TableHead>
-                    <TableHead className="font-semibold text-ayur-green">Last Visit</TableHead>
+                    <TableHead className="font-semibold text-ayur-green">Created</TableHead>
                     <TableHead className="font-semibold text-ayur-green">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -160,24 +220,29 @@ export const Patients = () => {
                             <Mail className="mr-2 h-3 w-3 text-ayur-green" />
                             {patient.email}
                           </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Phone className="mr-2 h-3 w-3 text-ayur-green" />
-                            {patient.phone}
-                          </div>
+                          {patient.phone && (
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Phone className="mr-2 h-3 w-3 text-ayur-green" />
+                              {patient.phone}
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${getDoshaColor(patient.dosha)} font-semibold border`}>
-                          {patient.dosha} Dosha
-                        </Badge>
+                        <div className="space-y-1">
+                          <Badge className={`${getDoshaColor(patient.primary_dosha)} font-semibold border`}>
+                            {patient.primary_dosha} Dosha
+                          </Badge>
+                          {patient.secondary_dosha && (
+                            <Badge variant="outline" className="text-xs">
+                              {patient.secondary_dosha}
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="text-sm font-medium text-foreground">
-                          {new Date(patient.lastVisit).toLocaleDateString('en-IN', { 
-                            day: 'numeric', 
-                            month: 'short', 
-                            year: 'numeric' 
-                          })}
+                          {format(new Date(patient.created_at), 'MMM dd, yyyy')}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -187,15 +252,53 @@ export const Patients = () => {
                             size="sm"
                             className="hover:bg-ayur-green-light/20 hover:border-ayur-green hover:text-ayur-green transition-all duration-200"
                           >
+                            <Eye className="h-3 w-3 mr-1" />
                             View
                           </Button>
                           <Button 
                             variant="outline" 
                             size="sm"
                             className="hover:bg-ayur-sand-light/20 hover:border-ayur-sand hover:text-ayur-sand transition-all duration-200"
+                            onClick={() => handleEditPatient(patient)}
                           >
+                            <Edit className="h-3 w-3 mr-1" />
                             Edit
                           </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="hover:bg-destructive/10 hover:border-destructive hover:text-destructive transition-all duration-200"
+                                disabled={isDeleting}
+                              >
+                                {isDeleting ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                )}
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the patient record
+                                  and remove all associated data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeletePatient(patient.id)}
+                                  className="bg-destructive hover:bg-destructive/90"
+                                >
+                                  Delete Patient
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -207,8 +310,24 @@ export const Patients = () => {
             {filteredPatients.length === 0 && (
               <div className="text-center py-12">
                 <UsersIcon className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
-                <p className="text-lg font-medium text-muted-foreground">No patients found</p>
-                <p className="text-sm text-muted-foreground">Try adjusting your search criteria</p>
+                <p className="text-lg font-medium text-muted-foreground">
+                  {patients.length === 0 ? 'No patients yet' : 'No patients found'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {patients.length === 0 
+                    ? 'Add your first patient to get started' 
+                    : 'Try adjusting your search criteria'
+                  }
+                </p>
+                {patients.length === 0 && (
+                  <Button 
+                    className="mt-4 bg-gradient-ayur hover:shadow-ayur text-white"
+                    onClick={handleAddPatient}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add First Patient
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>

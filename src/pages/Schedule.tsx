@@ -1,75 +1,82 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Users, Sparkles, Plus, Filter } from "lucide-react"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Plus, Calendar, Clock, User, Sparkles, Edit, Trash2, Loader2, CheckCircle, XCircle } from "lucide-react"
+import { useTherapies } from "@/hooks/useTherapies"
+import { TherapyForm } from "@/components/TherapyForm"
+import { Therapy } from "@/lib/supabase"
+import { format, isToday, isTomorrow, isYesterday } from "date-fns"
 
 export const Schedule = () => {
-  const [selectedTherapy, setSelectedTherapy] = useState("")
-  const [selectedPatient, setSelectedPatient] = useState("")
-  
-  const mockTherapies = [
-    "Abhyanga", "Shirodhara", "Udvartana", "Panchakarma", 
-    "Nasya", "Basti", "Virechana", "Raktamokshana"
-  ]
-  
-  const mockPatients = [
-    { id: "1", name: "Priya Sharma", dosha: "Vata" },
-    { id: "2", name: "Raj Patel", dosha: "Pitta" },
-    { id: "3", name: "Meera Singh", dosha: "Kapha" },
-  ]
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedTherapy, setSelectedTherapy] = useState<(Therapy & { patients: any }) | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const { therapies, isLoading, deleteTherapy, isDeleting } = useTherapies()
 
-  const mockSchedule = [
-    {
-      id: "1",
-      time: "9:00 AM",
-      patient: "Priya Sharma",
-      therapy: "Abhyanga",
-      dosha: "Vata",
-      status: "scheduled"
-    },
-    {
-      id: "2", 
-      time: "10:30 AM",
-      patient: "Raj Patel",
-      therapy: "Shirodhara",
-      dosha: "Pitta",
-      status: "completed"
-    },
-    {
-      id: "3",
-      time: "2:00 PM", 
-      patient: "Meera Singh",
-      therapy: "Udvartana",
-      dosha: "Kapha",
-      status: "scheduled"
+  const todayTherapies = therapies.filter(therapy => 
+    therapy.scheduled_date === selectedDate
+  )
+
+  const handleEditTherapy = (therapy: Therapy & { patients: any }) => {
+    setSelectedTherapy(therapy)
+    setIsFormOpen(true)
+  }
+
+  const handleAddTherapy = () => {
+    setSelectedTherapy(null)
+    setIsFormOpen(true)
+  }
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false)
+    setSelectedTherapy(null)
+  }
+
+  const handleDeleteTherapy = async (id: string) => {
+    try {
+      await deleteTherapy(id)
+    } catch (error) {
+      // Error is handled in the hook
     }
-  ]
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-ayur-green-light text-ayur-green border-ayur-green/30'
       case 'scheduled': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'in_progress': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200'
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
-  const getDoshaColor = (dosha: string) => {
-    switch (dosha) {
-      case 'Vata': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'Pitta': return 'bg-red-100 text-red-800 border-red-200'
-      case 'Kapha': return 'bg-green-100 text-green-800 border-green-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="h-4 w-4" />
+      case 'cancelled': return <XCircle className="h-4 w-4" />
+      default: return <Clock className="h-4 w-4" />
     }
   }
 
-  const handleGeneratePrecautions = () => {
-    // This will call the Supabase Edge Function to generate AI precautions
-    console.log("Generating AI precautions for therapy:", selectedTherapy)
+  const getDateLabel = (date: string) => {
+    if (isToday(new Date(date))) return 'Today'
+    if (isTomorrow(new Date(date))) return 'Tomorrow'
+    if (isYesterday(new Date(date))) return 'Yesterday'
+    return format(new Date(date), 'EEEE, MMM dd')
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gradient-subtle">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-ayur-green" />
+          <p className="text-muted-foreground">Loading schedule...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -78,7 +85,7 @@ export const Schedule = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-display font-bold text-ayur-green mb-2">Therapy Scheduler</h1>
-          <p className="text-lg text-muted-foreground">AI-powered therapy scheduling with personalized precautions</p>
+          <p className="text-lg text-muted-foreground">Intelligent therapy scheduling with personalized precautions</p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -92,87 +99,38 @@ export const Schedule = () => {
                     <span className="font-display">Schedule New Therapy</span>
                   </CardTitle>
                   <CardDescription className="text-white/80 mt-1">
-                    AI-generated precautions included
+                    Personalized precautions included
                   </CardDescription>
                 </div>
                 <Sparkles className="h-6 w-6 text-white/80 animate-float" />
               </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="patient" className="text-sm font-semibold text-foreground">Select Patient</Label>
-                <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-                  <SelectTrigger className="h-12 border-border/40 bg-background/50 focus:bg-background transition-all duration-200">
-                    <SelectValue placeholder="Choose patient for therapy" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-border/40">
-                    {mockPatients.map((patient) => (
-                      <SelectItem key={patient.id} value={patient.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{patient.name}</span>
-                          <Badge className={`ml-2 ${getDoshaColor(patient.dosha)} font-medium border`}>
-                            {patient.dosha}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <CardContent className="p-6">
+              <div className="text-center py-8">
+                <Calendar className="h-16 w-16 text-ayur-green mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">Ready to Schedule?</h3>
+                <p className="text-muted-foreground mb-6">
+                  Create a new therapy session with personalized precautions based on patient's dosha.
+                </p>
+                <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="bg-gradient-ayur hover:shadow-ayur text-white font-semibold transition-all duration-300 hover:scale-105"
+                      onClick={handleAddTherapy}
+                    >
+                      <Plus className="mr-2 h-5 w-5" />
+                      Schedule New Therapy
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <TherapyForm 
+                      therapy={selectedTherapy || undefined}
+                      onSuccess={handleFormSuccess}
+                      onCancel={() => setIsFormOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="therapy" className="text-sm font-semibold text-foreground">Therapy Type</Label>
-                <Select value={selectedTherapy} onValueChange={setSelectedTherapy}>
-                  <SelectTrigger className="h-12 border-border/40 bg-background/50 focus:bg-background transition-all duration-200">
-                    <SelectValue placeholder="Select Ayurvedic therapy" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-border/40">
-                    {mockTherapies.map((therapy) => (
-                      <SelectItem key={therapy} value={therapy}>
-                        {therapy}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date" className="text-sm font-semibold text-foreground">Date</Label>
-                  <Input 
-                    type="date" 
-                    className="h-12 border-border/40 bg-background/50 focus:bg-background transition-all duration-200"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="time" className="text-sm font-semibold text-foreground">Time</Label>
-                  <Input 
-                    type="time" 
-                    className="h-12 border-border/40 bg-background/50 focus:bg-background transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleGeneratePrecautions}
-                className="w-full h-12 bg-gradient-ayur hover:shadow-ayur text-white font-semibold transition-all duration-300 hover:scale-105"
-                disabled={!selectedTherapy || !selectedPatient}
-              >
-                <Sparkles className="mr-2 h-5 w-5 animate-pulse" />
-                Generate AI Precautions & Schedule
-              </Button>
-
-              {selectedTherapy && selectedPatient && (
-                <div className="p-4 bg-gradient-warm/10 border border-ayur-sand/30 rounded-xl animate-fade-in">
-                  <div className="flex items-center space-x-2 text-ayur-earth font-semibold mb-2">
-                    <Sparkles className="h-4 w-4" />
-                    <span className="text-sm">AI Precaution Preview</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    AI will generate personalized pre and post-therapy precautions based on the patient's Dosha and selected therapy.
-                  </p>
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -182,60 +140,182 @@ export const Schedule = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center space-x-2 text-white">
-                    <Clock className="h-5 w-5" />
-                    <span className="font-display">Today's Schedule</span>
+                    <Calendar className="h-5 w-5" />
+                    <span className="font-display">{getDateLabel(selectedDate)}</span>
                   </CardTitle>
                   <CardDescription className="text-white/80 mt-1">
-                    {new Date().toLocaleDateString('en-IN', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                    {todayTherapies.length} therapy session{todayTherapies.length !== 1 ? 's' : ''} scheduled
                   </CardDescription>
                 </div>
-                <Calendar className="h-6 w-6 text-white/80" />
+                <div className="text-right">
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-white/10 border border-white/20 rounded px-3 py-1 text-white text-sm"
+                  />
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              {mockSchedule.map((appointment, index) => (
-                <div key={appointment.id} className="group p-4 border border-border/30 rounded-xl bg-gradient-to-r from-background to-ayur-green-light/5 hover:shadow-warm hover:scale-105 transition-all duration-300">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-sm font-bold text-ayur-green bg-ayur-green-light/20 px-4 py-2 rounded-lg border border-ayur-green/20">
-                        {appointment.time}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-foreground group-hover:text-ayur-green transition-colors">
-                          {appointment.patient}
-                        </div>
-                        <div className="text-sm text-muted-foreground font-medium">
-                          {appointment.therapy} Therapy
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge className={`${getDoshaColor(appointment.dosha)} font-semibold border`}>
-                        {appointment.dosha}
-                      </Badge>
-                      <Badge className={`${getStatusColor(appointment.status)} font-semibold border`}>
-                        {appointment.status}
-                      </Badge>
-                    </div>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {todayTherapies.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <p className="text-muted-foreground">No therapies scheduled for this date</p>
+                    <p className="text-sm text-muted-foreground">Schedule a new therapy to get started</p>
                   </div>
-                </div>
-              ))}
-              
-              {mockSchedule.length === 0 && (
-                <div className="text-center py-12">
-                  <Calendar className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
-                  <p className="text-lg font-medium text-muted-foreground">No therapies scheduled</p>
-                  <p className="text-sm text-muted-foreground">Schedule your first therapy session above</p>
-                </div>
-              )}
+                ) : (
+                  todayTherapies.map((therapy, index) => (
+                    <div
+                      key={therapy.id}
+                      className="p-4 border border-border/40 rounded-xl bg-background/50 hover:bg-background/80 transition-all duration-200 animate-fade-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className="font-semibold text-foreground">{therapy.name}</h4>
+                            <Badge className={`${getStatusColor(therapy.status)} font-medium border text-xs`}>
+                              {getStatusIcon(therapy.status)}
+                              <span className="ml-1 capitalize">{therapy.status.replace('_', ' ')}</span>
+                            </Badge>
+                          </div>
+                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3" />
+                              <span>{therapy.patients?.name}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{therapy.scheduled_time}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <span>{therapy.duration_minutes} min</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditTherapy(therapy)}
+                            className="h-8 w-8 p-0 hover:bg-ayur-green-light/20"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                                disabled={isDeleting}
+                              >
+                                {isDeleting ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Cancel Therapy Session?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will cancel the therapy session for {therapy.patients?.name}. 
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Keep Scheduled</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteTherapy(therapy.id)}
+                                  className="bg-destructive hover:bg-destructive/90"
+                                >
+                                  Cancel Session
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      
+                      {therapy.precautions && therapy.precautions.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-border/20">
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Precautions:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {therapy.precautions.slice(0, 3).map((precaution, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {precaution}
+                              </Badge>
+                            ))}
+                            {therapy.precautions.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{therapy.precautions.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Upcoming Therapies */}
+        {therapies.length > 0 && (
+          <Card className="shadow-elegant hover:shadow-ayur transition-all duration-300 border-border/40 bg-gradient-to-br from-card to-background">
+            <CardHeader className="border-b border-border/20 bg-gradient-ayur text-white rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center space-x-2 text-white">
+                    <Calendar className="h-5 w-5" />
+                    <span className="font-display">Upcoming Therapies</span>
+                  </CardTitle>
+                  <CardDescription className="text-white/80 mt-1">
+                    Next 7 days schedule overview
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {therapies
+                  .filter(therapy => new Date(therapy.scheduled_date) > new Date())
+                  .slice(0, 6)
+                  .map((therapy, index) => (
+                    <div
+                      key={therapy.id}
+                      className="p-4 border border-border/40 rounded-xl bg-background/50 hover:bg-background/80 transition-all duration-200 animate-fade-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge className={`${getStatusColor(therapy.status)} font-medium border text-xs`}>
+                          {getStatusIcon(therapy.status)}
+                          <span className="ml-1 capitalize">{therapy.status.replace('_', ' ')}</span>
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(therapy.scheduled_date), 'MMM dd')}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-foreground mb-1">{therapy.name}</h4>
+                      <p className="text-sm text-muted-foreground mb-2">{therapy.patients?.name}</p>
+                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{therapy.scheduled_time}</span>
+                        <span>•</span>
+                        <span>{therapy.duration_minutes} min</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

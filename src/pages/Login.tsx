@@ -3,20 +3,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Leaf } from "lucide-react"
+import { Leaf, Eye, EyeOff } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { signInSchema, SignInInput } from "@/lib/validations"
+import { toast } from "sonner"
 
-interface LoginProps {
-  onLogin: () => void
-}
+export const Login = () => {
+  const [showPassword, setShowPassword] = useState(false)
+  const { signIn, loading } = useAuth()
 
-export const Login = ({ onLogin }: LoginProps) => {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<SignInInput>({
+    resolver: zodResolver(signInSchema)
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would handle Supabase authentication
-    onLogin()
+  const onSubmit = async (data: SignInInput) => {
+    try {
+      await signIn(data.email, data.password)
+    } catch (error) {
+      // Error is handled in the auth hook
+    }
   }
 
   return (
@@ -34,31 +45,54 @@ export const Login = ({ onLogin }: LoginProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                required
+                {...register('email')}
+                className={errors.email ? 'border-destructive' : ''}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  {...register('password')}
+                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
             </div>
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              Sign In
+            <Button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-primary/90"
+              disabled={isSubmitting || loading}
+            >
+              {isSubmitting || loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
           <div className="mt-6 text-center">
