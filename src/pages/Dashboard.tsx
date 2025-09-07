@@ -1,113 +1,160 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CalendarDays, Users, AlertCircle, TrendingUp } from "lucide-react"
+import { StatsCard } from "@/components/StatsCard"
+import { CalendarDays, Users, AlertCircle, TrendingUp, Sparkles, Clock, Activity } from "lucide-react"
 
 export const Dashboard = () => {
   return (
-    <div className="flex-1 space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to your AyurSutra practice management</p>
-      </div>
+    <div className="flex-1 space-y-8 p-8 bg-gradient-subtle animate-fade-in">
+      <div className="max-w-7xl mx-auto">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-display font-bold text-ayur-green mb-2">Practice Overview</h1>
+          <p className="text-lg text-muted-foreground">Your AyurSutra practice insights and today's activities</p>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Patients</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Therapies</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">6 completed, 2 pending</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Alerts</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">2</div>
-            <p className="text-xs text-muted-foreground">Requires attention</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Patient Satisfaction</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4.8</div>
-            <p className="text-xs text-muted-foreground">Average rating this month</p>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <StatsCard
+            title="Active Patients"
+            value="24"
+            description="+2 from last month"
+            icon={Users}
+            variant="success"
+          />
+          
+          <StatsCard
+            title="Today's Therapies"
+            value="8"
+            description="6 completed, 2 pending"
+            icon={CalendarDays}
+            variant="default"
+          />
+          
+          <StatsCard
+            title="Pending Alerts"
+            value="2"
+            description="Requires attention"
+            icon={AlertCircle}
+            variant="danger"
+          />
+          
+          <StatsCard
+            title="Patient Satisfaction"
+            value="4.8"
+            description="Average rating this month"
+            icon={TrendingUp}
+            variant="success"
+          />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Today's Schedule</CardTitle>
-            <CardDescription>Upcoming therapy sessions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { time: "9:00 AM", patient: "Priya Sharma", therapy: "Abhyanga", dosha: "Vata" },
-              { time: "10:30 AM", patient: "Raj Patel", therapy: "Shirodhara", dosha: "Pitta" },
-              { time: "2:00 PM", patient: "Meera Singh", therapy: "Udvartana", dosha: "Kapha" },
-            ].map((appointment, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="text-sm font-medium">{appointment.time}</div>
-                  <div>
-                    <div className="font-medium">{appointment.patient}</div>
-                    <div className="text-sm text-muted-foreground">{appointment.therapy}</div>
+        {/* Main Content Grid */}
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Today's Schedule */}
+          <Card className="shadow-elegant hover:shadow-ayur transition-all duration-300 border-border/40 bg-gradient-to-br from-card to-background">
+            <CardHeader className="border-b border-border/20 bg-gradient-ayur text-white rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center space-x-2 text-white">
+                    <Clock className="h-5 w-5" />
+                    <span className="font-display">Today's Schedule</span>
+                  </CardTitle>
+                  <CardDescription className="text-white/80 mt-1">
+                    {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </CardDescription>
+                </div>
+                <Sparkles className="h-6 w-6 text-white/80 animate-float" />
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {[
+                { time: "9:00 AM", patient: "Priya Sharma", therapy: "Abhyanga", dosha: "Vata", status: "upcoming" },
+                { time: "10:30 AM", patient: "Raj Patel", therapy: "Shirodhara", dosha: "Pitta", status: "completed" },
+                { time: "2:00 PM", patient: "Meera Singh", therapy: "Udvartana", dosha: "Kapha", status: "upcoming" },
+              ].map((appointment, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border border-border/30 rounded-xl bg-gradient-to-r from-background to-ayur-green-light/10 hover:shadow-warm transition-all duration-200">
+                  <div className="flex items-center space-x-4">
+                    <div className="text-sm font-semibold text-ayur-green bg-ayur-green-light/20 px-3 py-1 rounded-lg">
+                      {appointment.time}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground">{appointment.patient}</div>
+                      <div className="text-sm text-muted-foreground font-medium">{appointment.therapy}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Badge 
+                      variant="secondary" 
+                      className={`
+                        ${appointment.dosha === 'Vata' ? 'bg-blue-100 text-blue-800 border-blue-200' : ''}
+                        ${appointment.dosha === 'Pitta' ? 'bg-red-100 text-red-800 border-red-200' : ''}
+                        ${appointment.dosha === 'Kapha' ? 'bg-green-100 text-green-800 border-green-200' : ''}
+                        font-semibold border
+                      `}
+                    >
+                      {appointment.dosha}
+                    </Badge>
+                    <div className={`w-2 h-2 rounded-full ${appointment.status === 'completed' ? 'bg-ayur-green' : 'bg-ayur-sand animate-pulse'}`} />
                   </div>
                 </div>
-                <Badge variant="secondary">{appointment.dosha}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Alerts</CardTitle>
-            <CardDescription>AI-flagged patient feedback</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-3 border-l-4 border-l-destructive bg-destructive/5 rounded">
-                <AlertCircle className="h-4 w-4 text-destructive mt-0.5" />
+          {/* AI Alerts */}
+          <Card className="shadow-elegant hover:shadow-ayur transition-all duration-300 border-border/40 bg-gradient-to-br from-card to-background">
+            <CardHeader className="border-b border-border/20 bg-gradient-warm text-white rounded-t-lg">
+              <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium text-sm">High Risk Feedback</div>
-                  <div className="text-sm text-muted-foreground">Patient reported severe discomfort after Panchakarma session</div>
-                  <div className="text-xs text-muted-foreground mt-1">2 hours ago</div>
+                  <CardTitle className="flex items-center space-x-2 text-white">
+                    <Activity className="h-5 w-5" />
+                    <span className="font-display">AI Health Alerts</span>
+                  </CardTitle>
+                  <CardDescription className="text-white/80 mt-1">
+                    Intelligent patient monitoring
+                  </CardDescription>
+                </div>
+                <AlertCircle className="h-6 w-6 text-white/80 animate-pulse" />
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4 p-4 border-l-4 border-l-destructive bg-gradient-to-r from-destructive/5 to-background rounded-r-xl shadow-sm">
+                  <AlertCircle className="h-5 w-5 text-destructive mt-0.5 animate-pulse" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm text-destructive mb-1">High Risk Alert</div>
+                    <div className="text-sm text-foreground/80 leading-relaxed mb-2">
+                      Patient reported severe discomfort after Panchakarma session. AI confidence: 95%
+                    </div>
+                    <div className="text-xs text-muted-foreground font-medium">2 hours ago • Requires immediate attention</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4 p-4 border-l-4 border-l-ayur-sand bg-gradient-to-r from-ayur-sand-light/20 to-background rounded-r-xl shadow-sm">
+                  <AlertCircle className="h-5 w-5 text-ayur-sand mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm text-ayur-sand mb-1">Moderate Risk Alert</div>
+                    <div className="text-sm text-foreground/80 leading-relaxed mb-2">
+                      Unusual symptoms pattern detected in post-therapy feedback
+                    </div>
+                    <div className="text-xs text-muted-foreground font-medium">1 day ago • Follow-up recommended</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4 p-4 border-l-4 border-l-ayur-green bg-gradient-to-r from-ayur-green-light/20 to-background rounded-r-xl shadow-sm">
+                  <TrendingUp className="h-5 w-5 text-ayur-green mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm text-ayur-green mb-1">Positive Trend</div>
+                    <div className="text-sm text-foreground/80 leading-relaxed mb-2">
+                      Patient satisfaction scores increased by 15% this week
+                    </div>
+                    <div className="text-xs text-muted-foreground font-medium">3 days ago • Great progress!</div>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start space-x-3 p-3 border-l-4 border-l-orange-500 bg-orange-50 rounded">
-                <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5" />
-                <div>
-                  <div className="font-medium text-sm">Medium Risk Feedback</div>
-                  <div className="text-sm text-muted-foreground">Unusual symptoms reported post-therapy</div>
-                  <div className="text-xs text-muted-foreground mt-1">1 day ago</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

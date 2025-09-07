@@ -17,11 +17,26 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 140 67% 20%;
+    --primary: 140 85% 25%;
     --primary-foreground: 0 0% 98%;
     
-    --ayur-green: 140 67% 20%;
+    /* Ayurvedic Color Palette */
+    --ayur-green: 140 85% 25%;
+    --ayur-green-light: 140 60% 85%;
     --ayur-sand: 32 95% 44%;
+    --ayur-sand-light: 32 80% 90%;
+    --ayur-earth: 25 85% 35%;
+    --ayur-sage: 145 30% 60%;
+    
+    /* Enhanced Design Tokens */
+    --gradient-ayur: linear-gradient(135deg, hsl(var(--ayur-green)), hsl(var(--ayur-sage)));
+    --gradient-warm: linear-gradient(135deg, hsl(var(--ayur-sand)), hsl(var(--ayur-earth)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--ayur-green-light)));
+    
+    /* Shadows */
+    --shadow-ayur: 0 10px 30px -10px hsl(var(--ayur-green) / 0.2);
+    --shadow-warm: 0 8px 25px -8px hsl(var(--ayur-sand) / 0.3);
+    --shadow-elegant: 0 4px 20px -4px hsl(var(--foreground) / 0.1);
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
