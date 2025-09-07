@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { Calendar, Users, Home, MessageSquare, Settings, Leaf } from "lucide-react"
+import { Calendar, Users, Home, MessageSquare, Settings, Leaf, Brain } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ const navItems = [
   { title: "Patients", url: "/patients", icon: Users },
   { title: "Schedule", url: "/schedule", icon: Calendar },
   { title: "Feedback", url: "/feedback", icon: MessageSquare },
+  { title: "AI Assistant", url: "/ai", icon: Brain },
   { title: "Settings", url: "/settings", icon: Settings },
 ]
 

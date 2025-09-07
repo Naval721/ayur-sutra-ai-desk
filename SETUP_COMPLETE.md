@@ -137,6 +137,22 @@ SELECT generate_therapy_precautions('Panchakarma', 'Vata');
 - `subscribe.patients()` - Live patient updates
 - `subscribe.therapies()` - Live therapy updates
 
+## 🤖 **AI Features Added**
+
+### **✅ Google Gemini AI Integration**
+- **AI-Powered Dosha Analysis** - Intelligent diagnosis based on symptoms
+- **Treatment Recommendations** - Personalized therapy suggestions
+- **Patient Insights** - Comprehensive AI-generated analysis
+- **Smart Precautions** - AI-generated safety recommendations
+- **Enhanced Patient Forms** - Integrated AI assistance
+
+### **✅ AI Components**
+- **AIDashboard** - Central AI features hub
+- **AIDoshaAnalysis** - Interactive dosha analysis tool
+- **AITreatmentRecommendation** - Treatment planning interface
+- **AIPatientInsights** - Patient analysis dashboard
+- **EnhancedPatientForm** - AI-integrated patient forms
+
 ## 🎉 **You're All Set!**
 
 Your AyurSutra backend is **production-ready** and includes:
@@ -147,6 +163,7 @@ Your AyurSutra backend is **production-ready** and includes:
 - ✅ **Authentication System** with user management
 - ✅ **Security Features** with RLS and validation
 - ✅ **Advanced Features** like smart precautions
+- ✅ **AI Integration** with Google Gemini
 - ✅ **Type Safety** with full TypeScript support
 - ✅ **Performance Optimization** with proper indexing
 

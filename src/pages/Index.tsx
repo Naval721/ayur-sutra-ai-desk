@@ -6,6 +6,7 @@ import { Dashboard } from "@/pages/Dashboard"
 import { Patients } from "@/pages/Patients"
 import { Schedule } from "@/pages/Schedule"
 import { Feedback } from "@/pages/Feedback"
+import { AIDashboard } from "@/components/AIDashboard"
 import { useAuth } from "@/hooks/useAuth"
 import { useNotifications } from "@/hooks/useNotifications"
 import { Button } from "@/components/ui/button"
@@ -41,6 +42,8 @@ const Index = () => {
         return <Schedule />
       case 'feedback':
         return <Feedback />
+      case 'ai':
+        return <AIDashboard />
       default:
         return <Dashboard />
     }
