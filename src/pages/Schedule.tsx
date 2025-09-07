@@ -68,8 +68,8 @@ export const Schedule = () => {
   }
 
   const handleGeneratePrecautions = () => {
-    // This will call the Supabase Edge Function to generate AI precautions
-    console.log("Generating AI precautions for therapy:", selectedTherapy)
+    // This will call the Supabase Edge Function to generate personalized precautions
+    console.log("Generating personalized precautions for therapy:", selectedTherapy)
   }
 
   return (
@@ -78,7 +78,7 @@ export const Schedule = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-display font-bold text-ayur-green mb-2">Therapy Scheduler</h1>
-          <p className="text-lg text-muted-foreground">AI-powered therapy scheduling with personalized precautions</p>
+          <p className="text-lg text-muted-foreground">Intelligent therapy scheduling with personalized precautions</p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -92,7 +92,7 @@ export const Schedule = () => {
                     <span className="font-display">Schedule New Therapy</span>
                   </CardTitle>
                   <CardDescription className="text-white/80 mt-1">
-                    AI-generated precautions included
+                    Personalized precautions included
                   </CardDescription>
                 </div>
                 <Sparkles className="h-6 w-6 text-white/80 animate-float" />
@@ -159,17 +159,17 @@ export const Schedule = () => {
                 disabled={!selectedTherapy || !selectedPatient}
               >
                 <Sparkles className="mr-2 h-5 w-5 animate-pulse" />
-                Generate AI Precautions & Schedule
+                Generate Precautions & Schedule
               </Button>
 
               {selectedTherapy && selectedPatient && (
                 <div className="p-4 bg-gradient-warm/10 border border-ayur-sand/30 rounded-xl animate-fade-in">
                   <div className="flex items-center space-x-2 text-ayur-earth font-semibold mb-2">
                     <Sparkles className="h-4 w-4" />
-                    <span className="text-sm">AI Precaution Preview</span>
+                    <span className="text-sm">Precaution Preview</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    AI will generate personalized pre and post-therapy precautions based on the patient's Dosha and selected therapy.
+The system will generate personalized pre and post-therapy precautions based on the patient's Dosha and selected therapy.
                   </p>
                 </div>
               )}

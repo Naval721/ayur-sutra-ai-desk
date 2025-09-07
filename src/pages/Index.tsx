@@ -27,7 +27,7 @@ const Index = () => {
           <div className="flex-1 p-8 bg-gradient-subtle animate-fade-in">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-4xl font-display font-bold text-ayur-green mb-4">Feedback Inbox</h1>
-              <p className="text-muted-foreground text-lg">AI-analyzed patient feedback coming soon...</p>
+              <p className="text-muted-foreground text-lg">Patient feedback system coming soon...</p>
             </div>
           </div>
         )

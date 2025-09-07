@@ -101,17 +101,17 @@ export const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* AI Alerts */}
+          {/* Health Alerts */}
           <Card className="shadow-elegant hover:shadow-ayur transition-all duration-300 border-border/40 bg-gradient-to-br from-card to-background">
             <CardHeader className="border-b border-border/20 bg-gradient-warm text-white rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center space-x-2 text-white">
                     <Activity className="h-5 w-5" />
-                    <span className="font-display">AI Health Alerts</span>
+                    <span className="font-display">Health Alerts</span>
                   </CardTitle>
                   <CardDescription className="text-white/80 mt-1">
-                    Intelligent patient monitoring
+                    Patient monitoring and alerts
                   </CardDescription>
                 </div>
                 <AlertCircle className="h-6 w-6 text-white/80 animate-pulse" />
@@ -124,7 +124,7 @@ export const Dashboard = () => {
                   <div className="flex-1">
                     <div className="font-semibold text-sm text-destructive mb-1">High Risk Alert</div>
                     <div className="text-sm text-foreground/80 leading-relaxed mb-2">
-                      Patient reported severe discomfort after Panchakarma session. AI confidence: 95%
+                      Patient reported severe discomfort after Panchakarma session. Requires immediate attention.
                     </div>
                     <div className="text-xs text-muted-foreground font-medium">2 hours ago • Requires immediate attention</div>
                   </div>
