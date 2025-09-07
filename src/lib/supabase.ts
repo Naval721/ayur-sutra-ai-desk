@@ -5,7 +5,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Check if we're using the demo/development configuration
-const isDevelopment = supabaseUrl?.includes('ayursutra-demo') || supabaseUrl?.includes('your-project')
+const isDevelopment = supabaseUrl?.includes('ayursutra-demo') || supabaseUrl?.includes('your-project') || supabaseUrl?.includes('localhost')
 
 let supabase: any
 
