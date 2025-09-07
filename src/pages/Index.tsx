@@ -1,19 +1,36 @@
 import { useState } from "react"
+import { Navigate } from "react-router-dom"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
 import { Dashboard } from "@/pages/Dashboard"
 import { Patients } from "@/pages/Patients"
 import { Schedule } from "@/pages/Schedule"
-import { Login } from "@/pages/Login"
+import { Feedback } from "@/pages/Feedback"
+import { useAuth } from "@/hooks/useAuth"
+import { useNotifications } from "@/hooks/useNotifications"
 import { Button } from "@/components/ui/button"
-import { Bell, LogOut, User } from "lucide-react"
+import { Bell, LogOut, User, Loader2 } from "lucide-react"
+import { NotificationsPanel } from "@/components/NotificationsPanel"
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("dashboard")
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const { user, profile, loading, signOut } = useAuth()
+  const { unreadCount } = useNotifications()
 
-  if (!isAuthenticated) {
-    return <Login onLogin={() => setIsAuthenticated(true)} />
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-orange-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
   }
 
   const renderPage = () => {
@@ -23,14 +40,7 @@ const Index = () => {
       case 'schedule':
         return <Schedule />
       case 'feedback':
-        return (
-          <div className="flex-1 p-8 bg-gradient-subtle animate-fade-in">
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl font-display font-bold text-ayur-green mb-4">Feedback Inbox</h1>
-              <p className="text-muted-foreground text-lg">Patient feedback system coming soon...</p>
-            </div>
-          </div>
-        )
+        return <Feedback />
       default:
         return <Dashboard />
     }
@@ -55,14 +65,27 @@ const Index = () => {
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" className="relative hover:bg-ayur-green-light/50">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="relative hover:bg-ayur-green-light/50"
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              >
                 <Bell className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full animate-pulse" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full animate-pulse" />
+                )}
               </Button>
               <Button variant="ghost" size="sm" className="hover:bg-ayur-green-light/50">
                 <User className="h-4 w-4" />
+                <span className="ml-2 text-sm">{profile?.practitioner_name || 'Practitioner'}</span>
               </Button>
-              <Button variant="ghost" size="sm" className="hover:bg-ayur-green-light/50">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hover:bg-ayur-green-light/50"
+                onClick={() => signOut()}
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -74,6 +97,12 @@ const Index = () => {
           </main>
         </div>
       </div>
+      
+      {/* Notifications Panel */}
+      <NotificationsPanel 
+        isOpen={isNotificationsOpen} 
+        onClose={() => setIsNotificationsOpen(false)} 
+      />
     </SidebarProvider>
   );
 };
