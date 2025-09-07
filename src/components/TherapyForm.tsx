@@ -12,7 +12,7 @@ import { therapySchema, TherapyInput, Therapy } from "@/lib/validations"
 import { useTherapies } from "@/hooks/useTherapies"
 import { usePatients } from "@/hooks/usePatients"
 import { Loader2, Sparkles } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { db } from "@/lib/supabase"
 
 interface TherapyFormProps {
   therapy?: Therapy & { patients: any }
@@ -58,15 +58,10 @@ export const TherapyForm = ({ therapy, onSuccess, onCancel }: TherapyFormProps) 
     if (!selectedType || !selectedPatient) return
 
     try {
-      const { data, error } = await supabase.rpc('generate_therapy_precautions', {
-        therapy_type: selectedType,
-        patient_dosha: selectedPatient.primary_dosha
-      })
-
-      if (error) throw error
-      
-      setGeneratedPrecautions(data || [])
-      setValue('precautions', data || [])
+      // Generate precautions based on therapy type and dosha
+      const precautions = generateTherapyPrecautions(selectedType, selectedPatient.primary_dosha)
+      setGeneratedPrecautions(precautions)
+      setValue('precautions', precautions)
     } catch (error) {
       console.error('Error generating precautions:', error)
       // Fallback precautions
@@ -80,6 +75,65 @@ export const TherapyForm = ({ therapy, onSuccess, onCancel }: TherapyFormProps) 
       setGeneratedPrecautions(fallbackPrecautions)
       setValue('precautions', fallbackPrecautions)
     }
+  }
+
+  const generateTherapyPrecautions = (therapyType: string, dosha: string) => {
+    const precautions = [
+      'Avoid heavy meals 2 hours before therapy',
+      'Inform practitioner of any allergies',
+      'Wear comfortable, loose clothing'
+    ]
+
+    // Therapy-specific precautions
+    switch (therapyType) {
+      case 'Panchakarma':
+        precautions.push('Follow prescribed diet for 7 days before')
+        precautions.push('Avoid strenuous activities for 3 days after')
+        precautions.push('Drink plenty of warm water')
+        break
+      case 'Abhyanga':
+        precautions.push('Avoid cold water for 2 hours after')
+        precautions.push('Rest for 30 minutes after therapy')
+        break
+      case 'Shirodhara':
+        precautions.push('Keep head covered for 2 hours after')
+        precautions.push('Avoid reading or screen time for 4 hours')
+        break
+      case 'Nasya':
+        precautions.push('Avoid lying down for 30 minutes after')
+        precautions.push('Keep head elevated while sleeping')
+        break
+      case 'Basti':
+        precautions.push('Follow liquid diet for 24 hours after')
+        precautions.push('Avoid travel for 2 days')
+        break
+      case 'Virechana':
+        precautions.push('Follow prescribed diet for 3 days after')
+        precautions.push('Avoid cold foods and drinks')
+        break
+      case 'Raktamokshana':
+        precautions.push('Keep wound clean and dry')
+        precautions.push('Avoid heavy lifting for 2 days')
+        break
+    }
+
+    // Dosha-specific precautions
+    switch (dosha) {
+      case 'Vata':
+        precautions.push('Keep warm and avoid cold drafts')
+        precautions.push('Follow Vata-pacifying diet')
+        break
+      case 'Pitta':
+        precautions.push('Avoid spicy and hot foods')
+        precautions.push('Stay in cool environment')
+        break
+      case 'Kapha':
+        precautions.push('Engage in light exercise')
+        precautions.push('Avoid heavy and oily foods')
+        break
+    }
+
+    return precautions
   }
 
   useEffect(() => {

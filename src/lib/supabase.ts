@@ -31,6 +31,9 @@ if (isDevelopment) {
   supabase = createClient(supabaseUrl, supabaseAnonKey)
 }
 
+// Export the supabase client
+export { supabase }
+
 // Database Types
 export type Patient = {
   id: string

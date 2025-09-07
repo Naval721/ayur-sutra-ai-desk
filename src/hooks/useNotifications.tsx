@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase, subscribe } from '@/lib/supabase'
+import { subscribe } from '@/lib/supabase'
 import { useAuth } from './useAuth'
 import { toast } from 'sonner'
 
